@@ -1,0 +1,17 @@
+
+define init-peda
+    source ~/src/peda/peda.py
+end
+document init-peda
+    Initializes the PEDA (Python Exploit Development Assistant for GDB) framework
+end
+
+
+define init-pwndbg
+    source ~/src/pwndbg/gdbinit.py
+end
+document init-pwndbg
+    Initializes the pwndbg gdb extension (https://github.com/zachriggle/pwndbg)
+end
+
+

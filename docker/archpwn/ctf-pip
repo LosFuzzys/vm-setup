@@ -1,9 +1,21 @@
 #!/bin/bash
+set -e -o pipefail
+
+export WORKON_HOME=~/.virtualenvs
+if [[ ! -d "$WORKON_HOME" ]]; then
+    mkdir -p "$WORKON_HOME"
+fi
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 
 source $(which virtualenvwrapper.sh)
-if ! workon ctf; then
-    mkvirtualenv -p $(which python2) ctf
-    workon ctf
+
+if ! workon ctf 2>&1 1>/dev/null; then
+    echo "#### Creating py2 virtualenv 'ctf' ####" >&2
+    # for some reason mkvirtualenv returns non-zero even if it
+    # succeeds?
+    mkvirtualenv -p $(which python2) ctf || true
+    echo "#### Switching to 'ctf' virtualenv" >&2
+    workon ctf || (deactivate && workon ctf)
 fi
 
 exec pip $@

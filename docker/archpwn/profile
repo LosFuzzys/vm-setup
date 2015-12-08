@@ -1,0 +1,2 @@
+export PATH=$PATH:/home/fuzzy/bin/
+source $(which virtualenvwrapper.sh)
