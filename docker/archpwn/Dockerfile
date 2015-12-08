@@ -1,3 +1,5 @@
+#### WARNING: this might be outdated!!!
+
 FROM base/archlinux
 
 CMD ["echo", "Server = http://mirror1.htu.tugraz.at/archlinux/$repo/os/$arch", ">", "/etc/pacman.d/mirrorlist"]
@@ -11,7 +13,7 @@ RUN sed -e 's/#Color/Color/g' -i /etc/pacman.conf
 RUN pacman-key --refresh-keys
 RUN pacman -Syu --noconfirm; pacman-db-upgrade; pacman -Scc --noconfirm
 RUN pacman -Syy
-ADD pacinstall.sh /usr/local/bin/
+ADD files/pacinstall.sh /usr/local/bin/
 # a useful shell
 RUN pacinstall.sh sudo zsh grml-zsh-config zsh-syntax-highlighting
 # for pacaur
@@ -36,13 +38,13 @@ RUN pacinstall.sh mitmproxy
 # some more utility tools
 RUN pacinstall.sh tmux vim nano sqlite3
 
-ADD wheel /etc/sudoers.d/
+ADD files/wheel /etc/sudoers.d/
 RUN chmod 600 /etc/sudoers.d/wheel
 
 # install pacaur, so that we can fetch AUR packages
 
 #RUN wget -O /usr/local/bin/aur.sh http://aur.sh/ && chmod +x /usr/local/bin/aur.sh
-ADD aur.sh /usr/local/bin/aur.sh
+ADD files/aur.sh /usr/local/bin/aur.sh
 CMD ["chmod", "+x", "/usr/local/bin/aur.sh"]
 
 USER fuzzy
@@ -82,12 +84,12 @@ USER fuzzy
 
 # Install peda
 RUN git clone https://github.com/longld/peda.git
-ADD gdb-peda ~/bin/
+ADD files/gdb-peda ~/bin/
 
 # Install pwndbg
 USER fuzzy
 RUN git clone https://github.com/zachriggle/pwndbg.git
-ADD pwndbg ~/bin/
+ADD files/pwndbg ~/bin/
 USER root
 RUN pacinstall.sh capstone python2-capstone python3-capstone python2-pycparser
 
@@ -98,8 +100,8 @@ RUN ln -s /usr/lib/libffi-3.2.1/include /usr/include/libffi
 USER fuzzy
 WORKDIR /home/fuzzy/
 
-ADD ctf-pip bin/
-ADD pyvenv.sh /home/fuzzy/.pyvenv.sh
+ADD files/ctf-pip bin/
+ADD files/pyvenv.sh /home/fuzzy/.pyvenv.sh
 ENV PATH $PATH:/home/fuzzy/bin/
 #CMD ["mkvirtualenv", "-p", "\"$(which python2)\"", "ctf"]
 # binjitsu vs. pwntools?
@@ -117,10 +119,10 @@ RUN ctf-pip install --upgrade angr
 
 # Add some dotfiles
 USER fuzzy
-ADD gdbinit /home/fuzzy/.gdbinit
-ADD zshrc /home/fuzzy/.zshrc
-ADD profile /home/fuzzy/.profile
-ADD tmux.conf /home/fuzzy/.tmux.conf
+ADD files/gdbinit /home/fuzzy/.gdbinit
+ADD files/zshrc /home/fuzzy/.zshrc
+ADD files/profile /home/fuzzy/.profile
+ADD files/tmux.conf /home/fuzzy/.tmux.conf
 
 WORKDIR /home/fuzzy
 RUN git clone https://github.com/f0rki/dotvim ~/.vim
