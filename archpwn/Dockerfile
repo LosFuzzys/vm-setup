@@ -1,8 +1,4 @@
-#### WARNING: this might be outdated!!!
-
 FROM base/archlinux
-
-CMD ["echo", "Server = http://mirror1.htu.tugraz.at/archlinux/$repo/os/$arch", ">", "/etc/pacman.d/mirrorlist"]
 
 RUN useradd -m -g users -G wheel fuzzy
 
@@ -10,8 +6,13 @@ RUN sed -e 's/#Color/Color/g' -i /etc/pacman.conf
 
 # install stuff
 
+# force creation of gpg/dirmngr dirs for root
+ADD files/mirrorlist /etc/pacman.d/mirrorlist
+RUN dirmngr < /dev/null
 RUN pacman-key --refresh-keys
-RUN pacman -Syu --noconfirm; pacman-db-upgrade; pacman -Scc --noconfirm
+RUN pacman -Syu --noconfirm
+RUN pacman-db-upgrade
+RUN pacman -Scc --noconfirm
 RUN pacman -Syy
 ADD files/pacinstall.sh /usr/local/bin/
 # a useful shell
@@ -45,18 +46,21 @@ RUN chmod 600 /etc/sudoers.d/wheel
 
 #RUN wget -O /usr/local/bin/aur.sh http://aur.sh/ && chmod +x /usr/local/bin/aur.sh
 ADD files/aur.sh /usr/local/bin/aur.sh
-CMD ["chmod", "+x", "/usr/local/bin/aur.sh"]
+RUN chmod +x /usr/local/bin/aur.sh
 
 USER fuzzy
 RUN mkdir -p /home/fuzzy/pkg/
 WORKDIR /home/fuzzy/pkg/
 RUN gpg --recv-keys 0x1EB2638FF56C0C53
-CMD ["ls", "-al", "1>&2"]
-CMD ["env", "PATH=$PATH:/usr/bin/core_perl/", "aur.sh", "cower", "pacaur"]
-CMD ["ls", "-al", "1>&2"]
-#RUN aur.sh pacaur cower
+ENV PATH $PATH:/usr/bin/core_perl/
+USER fuzzy
+RUN aur.sh cower
 USER root
-CMD ["pacman", "-U", "--noconfirm", "pacaur*", "cower*"]
+RUN pacman -U --noconfirm ./cower/cower*.pkg.tar.xz
+USER fuzzy
+RUN aur.sh pacaur
+USER root
+RUN pacman -U --noconfirm ./pacaur/pacaur*.pkg.tar.xz
 
 USER fuzzy
 RUN mkdir -p /home/fuzzy/bin/
@@ -74,7 +78,7 @@ RUN git clone https://github.com/jpenalbae/r2-scripts
 
 # Install radare
 WORKDIR /home/fuzzy/src/radare2
-CMD ["env", "USE_R2_CAPSTONE=1", "./sys/install.sh"]
+RUN env USE_R2_CAPSTONE=1 ./sys/install.sh
 # and radeco?
 WORKDIR /home/fuzzy/src/radeco
 USER root
@@ -84,12 +88,12 @@ USER fuzzy
 
 # Install peda
 RUN git clone https://github.com/longld/peda.git
-ADD files/gdb-peda ~/bin/
+ADD files/gdb-peda /home/fuzzy/bin/
 
 # Install pwndbg
 USER fuzzy
 RUN git clone https://github.com/zachriggle/pwndbg.git
-ADD files/pwndbg ~/bin/
+ADD files/pwndbg /home/fuzzy/bin/
 USER root
 RUN pacinstall.sh capstone python2-capstone python3-capstone python2-pycparser
 
@@ -100,22 +104,22 @@ RUN ln -s /usr/lib/libffi-3.2.1/include /usr/include/libffi
 USER fuzzy
 WORKDIR /home/fuzzy/
 
-ADD files/ctf-pip bin/
-ADD files/pyvenv.sh /home/fuzzy/.pyvenv.sh
+ADD files/ctf-pip /home/fuzzy/bin/
+ADD files/pyenv.sh /home/fuzzy/.pyvenv.sh
 ENV PATH $PATH:/home/fuzzy/bin/
 #CMD ["mkvirtualenv", "-p", "\"$(which python2)\"", "ctf"]
 # binjitsu vs. pwntools?
 #RUN ctf-pip install 'git+https://github.com/Gallopsled/pwntools#egg=pwntools'
 RUN ctf-pip install --upgrade ipython bpython
 RUN ctf-pip install --upgrade capstone pycparser
-CMD ["ctf-pip", "install", "--upgrade", "\'git+https://github.com/binjitsu/binjitsu.git\'"]
+RUN ctf-pip install --upgrade 'git+https://github.com/binjitsu/binjitsu.git'
 RUN ctf-pip install --upgrade hashpumpy
 RUN cd src/ && ctf-pip install -e python-paddingoracle
 RUN ctf-pip install --upgrade angr
 
 
 # install some packages from AUR
-#CMD pacaur -Syu --noconfirm metasploit-git
+CMD pacaur -Syu --noconfirm metasploit-git
 
 # Add some dotfiles
 USER fuzzy
@@ -125,17 +129,18 @@ ADD files/profile /home/fuzzy/.profile
 ADD files/tmux.conf /home/fuzzy/.tmux.conf
 
 WORKDIR /home/fuzzy
-RUN git clone https://github.com/f0rki/dotvim ~/.vim
+RUN git clone https://github.com/f0rki/dotvim /home/fuzzy/.vim
 WORKDIR /home/fuzzy/.vim
 RUN ./clonevundle.sh
-CMD ["printf" "\':q!\n:q!\n\'", "|", "vim", "-c", "\'PluginInstall\'"]
+#CMD ["printf" "\':q!\n:q!\n\'", "|", "vim", "-c", "\'PluginInstall\'"]
 #WORKDIR /home/fuzzy/.vim/bundle/YouCompleteMe
 #RUN git submodule update --init --recursive
 #RUN python2 install.py --clang-completer --system-boost --system-libclang
 
 # Update system again
 USER root
-RUN pacman -Syu --noconfirm; pacman -Scc --noconfirm
+RUN pacman -Syu --noconfirm
+RUN pacman -Scc --noconfirm
 # change the shell for primary user
 RUN chsh -s /usr/bin/zsh fuzzy
 
