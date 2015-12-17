@@ -6,7 +6,7 @@ USER=root
 FILES_LOCATION="/tmp/install/"
 
 function RUN() {
-    sudo -H -u "$USER" sh -c "$@"
+    sudo -H -u "$USER" "$@"
 }
 
 function USER() {
