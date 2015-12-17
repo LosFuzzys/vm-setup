@@ -1,0 +1,6 @@
+#eco solarized
+e bin.demangle = true
+e asm.demangle = true
+e scr.utf8 = true
+#e asm.pseudo = true
+e cmd.stack = true

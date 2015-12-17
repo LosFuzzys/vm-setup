@@ -6,7 +6,7 @@ USER=root
 FILES_LOCATION="/tmp/install/"
 
 function RUN() {
-    sudo -H -u $USER "$@"
+    sudo -H -u "$USER" sh -c "$@"
 }
 
 function USER() {
@@ -23,12 +23,12 @@ function ENV() {
 
 function ADD() {
     cp "$FILES_LOCATION/$1" "$2"
+    chown -R "$USER" "$2"
 }
 
 function FROM() { echo "[-] Ignoring FROM"; }
-function WORKDIR() { echo "[-] Ignoring WORKDIR"; }
 function ENTRYPOINT() { echo "[-] Ignoring ENTRYPOINT"; }
+function VOLUME() { echo "[-] Ignoring VOLUME"; }
 
-
-
+# source the docker file
 source Dockerfile

@@ -72,25 +72,31 @@ WORKDIR /home/fuzzy/src/
 RUN git clone https://github.com/sqlmapproject/sqlmap.git
 RUN git clone https://github.com/mwielgoszewski/python-paddingoracle.git
 
+# radare stuff
 RUN git clone https://github.com/radare/radare2
-RUN git clone https://github.com/radare/radeco.git
+#RUN git clone https://github.com/radare/radare2-extras
 RUN git clone https://github.com/jpenalbae/r2-scripts
 
 # Install radare
 WORKDIR /home/fuzzy/src/radare2
 RUN env USE_R2_CAPSTONE=1 ./sys/install.sh
-# and radeco?
-WORKDIR /home/fuzzy/src/radeco
-USER root
-RUN pacinstall.sh rust cargo
-USER fuzzy
-#RUN cargo build
+
+ADD files/radare2rc /home/fuzzy/.radare2rc
+
+# skip radeco for now
+#WORKDIR /home/fuzzy/src/
+#RUN git clone https://github.com/radare/radeco.git
+#RUN git clone https://github.com/radare/radeco-lib.git
+#RUN git clone https://github.com/brson/multirust.git
+
 
 # Install peda
+WORKDIR /home/fuzzy/src
 RUN git clone https://github.com/longld/peda.git
 ADD files/gdb-peda /home/fuzzy/bin/
 
 # Install pwndbg
+WORKDIR /home/fuzzy/src
 USER fuzzy
 RUN git clone https://github.com/zachriggle/pwndbg.git
 ADD files/pwndbg /home/fuzzy/bin/
@@ -139,6 +145,7 @@ RUN ./clonevundle.sh
 
 # Update system again
 USER root
+ADD files/10-ptrace.conf /etc/sysctl.d/
 RUN pacman -Syu --noconfirm
 RUN pacman -Scc --noconfirm
 # change the shell for primary user

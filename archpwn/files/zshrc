@@ -1,3 +1,6 @@
 export PATH=$PATH:/home/fuzzy/bin/
 
+# avoid some unicode issues, e.g. with radare
+export LANG="en_US.UTF-8"
+
 source $(which virtualenvwrapper.sh)
