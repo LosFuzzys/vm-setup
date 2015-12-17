@@ -125,7 +125,7 @@ RUN ctf-pip install --upgrade angr
 
 
 # install some packages from AUR
-CMD pacaur -Syu --noconfirm metasploit-git
+RUN pacaur -Syu --noconfirm metasploit-git
 
 # Add some dotfiles
 USER fuzzy

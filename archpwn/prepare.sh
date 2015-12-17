@@ -26,6 +26,10 @@ function ADD() {
     chown -R "$USER" "$2"
 }
 
+function CMD() {
+    echo "[-] Warning: ingnoring CMD $@"
+}
+
 function FROM() { echo "[-] Ignoring FROM"; }
 function ENTRYPOINT() { echo "[-] Ignoring ENTRYPOINT"; }
 function VOLUME() { echo "[-] Ignoring VOLUME"; }
