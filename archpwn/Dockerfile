@@ -66,66 +66,17 @@ USER fuzzy
 RUN mkdir -p /home/fuzzy/bin/
 RUN mkdir -p /home/fuzzy/src/
 
-WORKDIR /home/fuzzy/src/
-
-# some more tools
-RUN git clone https://github.com/sqlmapproject/sqlmap.git
-RUN git clone https://github.com/mwielgoszewski/python-paddingoracle.git
-
-# radare stuff
-RUN git clone https://github.com/radare/radare2
-#RUN git clone https://github.com/radare/radare2-extras
-RUN git clone https://github.com/jpenalbae/r2-scripts
-
-# Install radare
-WORKDIR /home/fuzzy/src/radare2
-RUN env USE_R2_CAPSTONE=1 ./sys/install.sh
-
-ADD files/radare2rc /home/fuzzy/.radare2rc
-
-# skip radeco for now
-#WORKDIR /home/fuzzy/src/
-#RUN git clone https://github.com/radare/radeco.git
-#RUN git clone https://github.com/radare/radeco-lib.git
-#RUN git clone https://github.com/brson/multirust.git
-
-
-# Install peda
-WORKDIR /home/fuzzy/src
-RUN git clone https://github.com/longld/peda.git
-ADD files/gdb-peda /home/fuzzy/bin/
-
-# Install pwndbg
-WORKDIR /home/fuzzy/src
-USER fuzzy
-RUN git clone https://github.com/zachriggle/pwndbg.git
-ADD files/pwndbg /home/fuzzy/bin/
-USER root
-RUN pacinstall.sh capstone python2-capstone python3-capstone python2-pycparser
-
-# we need this for angr build to work
-USER root
-RUN ln -s /usr/lib/libffi-3.2.1/include /usr/include/libffi
-
-USER fuzzy
 WORKDIR /home/fuzzy/
 
-ADD files/ctf-pip /home/fuzzy/bin/
 ADD files/pyenv.sh /home/fuzzy/.pyvenv.sh
 ENV PATH $PATH:/home/fuzzy/bin/
-#CMD ["mkvirtualenv", "-p", "\"$(which python2)\"", "ctf"]
-# binjitsu vs. pwntools?
-#RUN ctf-pip install 'git+https://github.com/Gallopsled/pwntools#egg=pwntools'
-RUN ctf-pip install --upgrade ipython bpython
-RUN ctf-pip install --upgrade capstone pycparser
-RUN ctf-pip install --upgrade 'git+https://github.com/binjitsu/binjitsu.git'
-RUN ctf-pip install --upgrade hashpumpy
-RUN cd src/ && ctf-pip install -e python-paddingoracle
-RUN ctf-pip install --upgrade angr
 
-
-# install some packages from AUR
-RUN pacaur -Syu --noconfirm metasploit-git
+# clone ctf-tools repo
+RUN git clone -b archlinux https://github.com/LosFuzzys/ctf-tools.git
+RUN /home/fuzzy/ctf-tools/manage-tools setup
+# everyone needs these ;)
+RUN /home/fuzzy/ctf-tools/manage-tools -s install radare
+RUN /home/fuzzy/ctf-tools/manage-tools -s install binjitsu
 
 # Add some dotfiles
 USER fuzzy
@@ -133,15 +84,6 @@ ADD files/gdbinit /home/fuzzy/.gdbinit
 ADD files/zshrc /home/fuzzy/.zshrc
 ADD files/profile /home/fuzzy/.profile
 ADD files/tmux.conf /home/fuzzy/.tmux.conf
-
-WORKDIR /home/fuzzy
-RUN git clone https://github.com/f0rki/dotvim /home/fuzzy/.vim
-WORKDIR /home/fuzzy/.vim
-RUN ./clonevundle.sh
-#CMD ["printf" "\':q!\n:q!\n\'", "|", "vim", "-c", "\'PluginInstall\'"]
-#WORKDIR /home/fuzzy/.vim/bundle/YouCompleteMe
-#RUN git submodule update --init --recursive
-#RUN python2 install.py --clang-completer --system-boost --system-libclang
 
 # Update system again
 USER root

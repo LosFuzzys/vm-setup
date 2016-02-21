@@ -6,7 +6,7 @@ USER=root
 FILES_LOCATION="/tmp/install/"
 
 function RUN() {
-    sudo -H -u "$USER" "$@"
+    sudo -E -H -n -u "$USER" "$@"
 }
 
 function USER() {
@@ -14,7 +14,7 @@ function USER() {
 }
 
 function WORKDIR() {
-    pushd $1
+    pushd $1 || true
 }
 
 function ENV() {
