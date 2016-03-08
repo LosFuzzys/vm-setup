@@ -1,3 +1,3 @@
 #!/bin/sh
-pacman -Sy --noconfirm $@
+pacman -Sy --needed --noconfirm $@
 pacman -Scc --noconfirm
