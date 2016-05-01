@@ -69,7 +69,8 @@ ENV PATH $PATH:/home/fuzzy/bin/
 
 # clone ctf-tools repo
 RUN git clone -b archlinux https://github.com/LosFuzzys/ctf-tools.git
-RUN /home/fuzzy/ctf-tools/manage-tools setup
+ENV PATH $PATH:/home/fuzzy/ctf-tools/bin/
+RUN manage-tools setup
 
 # Add some dotfiles
 USER fuzzy
