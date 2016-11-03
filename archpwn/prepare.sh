@@ -3,7 +3,7 @@
 set -eux -o pipefail
 
 USER=root
-FILES_LOCATION="/tmp/install/"
+FILES_LOCATION="."
 
 function RUN() {
     sudo -E -H -n -u "$USER" "$@"
